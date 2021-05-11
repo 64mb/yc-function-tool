@@ -1,0 +1,10 @@
+/.vscode
+/.idea
+/.directory
+/..env/
+
+__pycache__
+
+.env
+.*.json
+.deploy.zip
