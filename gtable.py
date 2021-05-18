@@ -3,13 +3,11 @@ import os
 import json
 import gspread
 import gspread.utils
+from tg import *
 
-SPREADSHEET_ID = ""
+SPREADSHEET_ID = os.environ.get('GSPREAD_ID')
 
-EMPLOYEE_CHECK = ['']
-
-TG_BOT_TOKEN = ''
-TG_CHAT_ID = ''
+EMPLOYEE_CHECK = [os.environ.get('EMPLOYEE')]
 
 
 class COLUMNS:
@@ -24,11 +22,11 @@ def main():
   service_account = os.environ.get('GOOGLE_SERVICE_ACCOUNT')
   if service_account.endswith('.json'):
     f = open(service_account, 'r')
-    service_account = json.loads(f.read().replace('%3d', '='))
+    service_account = f.read().replace('%3d', '=')
     f.close()
+  service_account = json.loads(service_account)
 
-  gc = gspread.service_account_from_dict(
-      os.environ.get('GOOGLE_SERVICE_ACCOUNT'))
+  gc = gspread.service_account_from_dict(service_account)
 
   sheet = gc.open_by_key(SPREADSHEET_ID)
   work_sheet = sheet.get_worksheet(0)
@@ -37,7 +35,7 @@ def main():
   header = table_seed[:1]
   table = table_seed[1:]
 
-  employee = [em.lower() for em in EMPLOYEE_CHECK]
+  employee = [em.strip().lower() for em in EMPLOYEE_CHECK]
   for row in table:
     people = row[COLUMNS.PEOPLE]
 
@@ -59,8 +57,9 @@ def main():
 
     seed = date + '###' + time + '###' + type + '###' + theme
 
-    # parse_mode': 'Markdown',
-    #       'text': '*Новое собрание*\n\n`' + theme + '`\n\nДата: ' + date+' ' + time + '\nТип: ' + type + '\nСостав: ' + people
+    tg.bot.send_message(text='*Новое собрание*\n\n`' + theme + '`\n\nДата: ' + date +
+                        ' ' + time + '\nТип: ' + type + '\nСостав: ' + people,  parse_mode='Markdown', chat_id=tg.chat_id)
+  return
 
 
 main()
